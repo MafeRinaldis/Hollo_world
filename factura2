@@ -1,0 +1,74 @@
+import datetime
+from fpdf import FPDF
+
+class Facturamafe(FPDF):
+    def header(self):
+        self.set_font("Arial", "B", 12)
+        self.cell(0, 10, "Factura de Comida", 0, 1, 'C')
+    
+    def footer(self):
+        self.set_y(-15)
+        self.set_font("Arial", "I", 8)
+        self.cell(0, 10, f"Página {self.page_no()}", 0, 0, 'C')
+
+# Función para obtener datos del usuario
+def obtener_datos():
+    nombre_restaurante = input("Ingrese el nombre del restaurante: ")
+    direccion_restaurante = input("Ingrese la dirección del restaurante: ")
+    nombre_cliente = input("Ingrese el nombre del cliente: ")
+
+    productos = []
+    while True:
+        producto = input("Ingrese el nombre del producto (o 'fin' para terminar): ")
+        if producto.lower() == 'fin':
+            break
+        cantidad = int(input(f"Ingrese la cantidad de {producto}: "))  # Convertir a entero
+        precio = float(input(f"Ingrese el precio de {producto}: "))
+        productos.append((producto, cantidad, precio))
+    
+    return nombre_restaurante, direccion_restaurante, nombre_cliente, productos
+
+# Obtener datos del usuario
+nombre_restaurante, direccion_restaurante, nombre_cliente, productos = obtener_datos()
+
+# Crear una instancia de la clase Facturamafe
+pdf = Facturamafe()
+pdf.add_page()
+
+# Establecer la fuente
+pdf.set_font("Arial", size=12)
+
+# Agregar información de la factura
+pdf.cell(0, 10, f"Fecha: {datetime.date.today()}", 0, 1)
+pdf.cell(0, 10, f"Restaurante: {nombre_restaurante}", 0, 1)
+pdf.cell(0, 10, f"Dirección: {direccion_restaurante}", 0, 1)
+pdf.cell(0, 10, f"Cliente: {nombre_cliente}", 0, 1)    
+
+# Agregar detalles de la comida
+pdf.ln(10)
+pdf.set_font("Arial", size=12, style="B")
+pdf.cell(0, 10, "Detalles de la Comida", 0, 1, 'C')
+pdf.ln(10)
+pdf.set_font("Arial", size=12)
+pdf.cell(50, 10, "Producto", 1, 0, 'L')
+pdf.cell(50, 10, "Cantidad", 1, 0, 'L')
+pdf.cell(50, 10, "Precio", 1, 0, 'L')
+pdf.cell(50, 10, "Total", 1, 0, 'L')
+pdf.ln(10)
+
+total_general = 0
+for producto, cantidad, precio in productos:
+    total_productos = precio * cantidad
+    total_general += total_productos
+    pdf.cell(50, 10, producto, 1, 0, 'L')
+    pdf.cell(50, 10, str(cantidad), 1, 0, 'L')
+    pdf.cell(50, 10, f"{precio:.2f}", 1, 0, 'L')
+    pdf.cell(50, 10, f"{total_productos:.2f}", 1, 0, 'L')
+    pdf.ln(10)
+
+
+
+# Guardar el PDF
+pdf.output("factura_comida.pdf", "F")
+
+print("La factura ha sido generada como 'factura_comida.pdf'")
