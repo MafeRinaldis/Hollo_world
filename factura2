@@ -1,74 +1,90 @@
-import datetime
-from fpdf import FPDF
+import datetime  # Importa el módulo datetime para manejar fechas
+from fpdf import FPDF  # Importa la clase FPDF de la biblioteca fpdf para crear PDFs
 
+# Definición de la clase Facturamafe que hereda de FPDF
 class Facturamafe(FPDF):
-    def header(self):
-        self.set_font("Arial", "B", 12)
-        self.cell(0, 10, "Factura de Comida", 0, 1, 'C')
-    
-    def footer(self):
-        self.set_y(-15)
-        self.set_font("Arial", "I", 8)
-        self.cell(0, 10, f"Página {self.page_no()}", 0, 0, 'C')
+    def header(self):  # Método para definir el encabezado del PDF
+        self.set_font("Arial", "B", 12)  # Establece la fuente Arial en negrita y tamaño 12
+        self.cell(0, 10, "Factura de Comida", 0, 1, 'C')  # Añade el título centrado en la parte superior
+
+    def footer(self):  # Método para definir el pie de página del PDF
+        self.set_y(-15)  # Posiciona el cursor a 15 unidades del borde inferior
+        self.set_font("Arial", "I", 8)  # Establece la fuente Arial en cursiva y tamaño 8
+        self.cell(0, 10, f"Página {self.page_no()}", 0, 0, 'C')  # Añade el número de página centrado
 
 # Función para obtener datos del usuario
 def obtener_datos():
+    # Solicita el nombre del restaurante
     nombre_restaurante = input("Ingrese el nombre del restaurante: ")
+    # Solicita la dirección del restaurante
     direccion_restaurante = input("Ingrese la dirección del restaurante: ")
+    # Solicita el nombre del cliente
     nombre_cliente = input("Ingrese el nombre del cliente: ")
 
-    productos = []
-    while True:
+    productos = []  # Inicializa una lista vacía para almacenar los productos
+    while True:  # Ciclo que se repite hasta que el usuario decida terminar
         producto = input("Ingrese el nombre del producto (o 'fin' para terminar): ")
-        if producto.lower() == 'fin':
+        if producto.lower() == 'fin':  # Si el usuario ingresa 'fin', se sale del ciclo
             break
-        cantidad = int(input(f"Ingrese la cantidad de {producto}: "))  # Convertir a entero
+        # Solicita la cantidad del producto y la convierte a entero
+        cantidad = int(input(f"Ingrese la cantidad de {producto}: "))  
+        # Solicita el precio del producto y lo convierte a float
         precio = float(input(f"Ingrese el precio de {producto}: "))
+        # Añade el producto, cantidad y precio como una tupla a la lista de productos
         productos.append((producto, cantidad, precio))
     
+    # Devuelve todos los datos recopilados
     return nombre_restaurante, direccion_restaurante, nombre_cliente, productos
 
-# Obtener datos del usuario
+# Llama a la función obtener_datos y almacena los resultados en variables
 nombre_restaurante, direccion_restaurante, nombre_cliente, productos = obtener_datos()
 
-# Crear una instancia de la clase Facturamafe
+# Crea una instancia de la clase Facturamafe
 pdf = Facturamafe()
-pdf.add_page()
+pdf.add_page()  # Añade una nueva página al PDF
 
-# Establecer la fuente
+# Establece la fuente para el texto
 pdf.set_font("Arial", size=12)
 
-# Agregar información de la factura
+# Agrega la fecha actual al PDF
 pdf.cell(0, 10, f"Fecha: {datetime.date.today()}", 0, 1)
+# Agrega el nombre del restaurante al PDF
 pdf.cell(0, 10, f"Restaurante: {nombre_restaurante}", 0, 1)
+# Agrega la dirección del restaurante al PDF
 pdf.cell(0, 10, f"Dirección: {direccion_restaurante}", 0, 1)
+# Agrega el nombre del cliente al PDF
 pdf.cell(0, 10, f"Cliente: {nombre_cliente}", 0, 1)    
 
-# Agregar detalles de la comida
+# Añade un espacio antes de los detalles de la comida
 pdf.ln(10)
-pdf.set_font("Arial", size=12, style="B")
-pdf.cell(0, 10, "Detalles de la Comida", 0, 1, 'C')
-pdf.ln(10)
+pdf.set_font("Arial", size=12, style="B")  # Cambia la fuente a negrita para el título
+pdf.cell(0, 10, "Detalles de la Comida", 0, 1, 'C')  # Agrega el título de detalles de comida centrado
+pdf.ln(10)  # Añade un espacio adicional
+
+# Establece la fuente de nuevo a tamaño normal
 pdf.set_font("Arial", size=12)
-pdf.cell(50, 10, "Producto", 1, 0, 'L')
-pdf.cell(50, 10, "Cantidad", 1, 0, 'L')
-pdf.cell(50, 10, "Precio", 1, 0, 'L')
-pdf.cell(50, 10, "Total", 1, 0, 'L')
-pdf.ln(10)
+# Agrega los encabezados de la tabla
+pdf.cell(50, 10, "Producto", 1, 0, 'L')  # Columna para el nombre del producto
+pdf.cell(50, 10, "Cantidad", 1, 0, 'L')  # Columna para la cantidad
+pdf.cell(50, 10, "Precio", 1, 0, 'L')  # Columna para el precio
+pdf.cell(50, 10, "Total", 1, 0, 'L')  # Columna para el total
+pdf.ln(10)  # Añade una línea para separar los encabezados de los datos
 
-total_general = 0
+total_general = 0  # Inicializa la variable para el total general
+# Recorre la lista de productos
 for producto, cantidad, precio in productos:
-    total_productos = precio * cantidad
-    total_general += total_productos
-    pdf.cell(50, 10, producto, 1, 0, 'L')
-    pdf.cell(50, 10, str(cantidad), 1, 0, 'L')
-    pdf.cell(50, 10, f"{precio:.2f}", 1, 0, 'L')
-    pdf.cell(50, 10, f"{total_productos:.2f}", 1, 0, 'L')
-    pdf.ln(10)
+    total_productos = precio * cantidad  # Calcula el total del producto
+    total_general += total_productos  # Suma al total general
+    # Agrega los detalles del producto a la tabla
+    pdf.cell(50, 10, producto, 1, 0, 'L')  # Nombre del producto
+    pdf.cell(50, 10, str(cantidad), 1, 0, 'L')  # Cantidad del producto
+    pdf.cell(50, 10, f"{precio:.2f}", 1, 0, 'L')  # Precio del producto, formateado a 2 decimales
+    pdf.cell(50, 10, f"{total_productos:.2f}", 1, 0, 'L')  # Total del producto, formateado a 2 decimales
+    pdf.ln(10)  # Añade una línea para el siguiente producto
 
-
-
-# Guardar el PDF
+# Guarda el documento PDF con el nombre 'factura_comida.pdf'
 pdf.output("factura_comida.pdf", "F")
 
+# Imprime un mensaje en la consola indicando que la factura ha sido generada
 print("La factura ha sido generada como 'factura_comida.pdf'")
+
